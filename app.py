@@ -13,6 +13,7 @@ TODO
 - Information to help the user
 - Any cloud computing to help generate PDFs?
 - Edit Theme for Morgan Colors
+- Py thing to have langchain repeat until correct format
 
 - Chat with our virtual assistant, upload a document for more context
 
@@ -59,7 +60,23 @@ from langchain.chains import ConversationChain
 from langchain.chains.conversation.memory import ConversationSummaryMemory
 import streamlit.components.v1 as components
 
+from azure.ai.formrecognizer import DocumentAnalysisClient
+from azure.ai.formrecognizer import FormTrainingClient
+from azure.core.credentials import AzureKeyCredential
+
 openai_api_key = api_key.OPENAI_API_KEY
+
+key = "4e82a9d6d05f46baaa8dcfdcf0d66511"
+endpoint = "https://morganreader.cognitiveservices.azure.com/"
+
+DOCUMENT_TYPES = [
+    'Court Order',
+    'Medical Record',
+    'Medical Bill',
+    'Correspondance',
+    'Police Report',
+    'Other'
+]
 
 def load_css():
     with open("static/styles.css", "r") as f:
@@ -98,22 +115,35 @@ def main():
     
     # Begin the Streamlit App Here
     st.title('MorganAI')
+    st.write('lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.')
 
 
-    st.sidebar.title("Upload a File")
-    source_doc = st.sidebar.file_uploader("Upload Source Document", type="pdf")
+    # Do the sidebar here
+    st.sidebar.title('Enter Document URL')
+    file = st.sidebar.file_uploader("Upload a file", type=["pdf", "png", "jpg", "jpeg"])
+    if file:
+        document_analysis_client = DocumentAnalysisClient(
+            endpoint=doc_intel.endpoint,
+            credential=AzureKeyCredential(doc_intel.key)
+        )
 
-    if not source_doc:
-        st.sidebar.error("Please upload a source document.")
-        st.error("Please upload a source document to continue.")
+        poller = document_analysis_client.begin_analyze_document(
+            "prebuilt-receipt", file
+        )
+
+        result = poller.result()
+        st.sidebar.write(result.content)
     else:
-        with st.spinner('Please wait while we analyze your documents...'):
-            vectordb = get_vectorstore(source_doc)
-            llm = OpenAI(temperature=0, openai_api_key=openai_api_key)
+        st.warning('Please upload a file for further analysis')
 
-            #summary = get_summary(vectordb, llm)
-            #st.success(summary)
               
+    st.markdown('---')
+
+    if file:
+        st.success(f'Document type: {DOCUMENT_TYPES[int(get_type_of_document(result.content)) - 1]}')
+
+    st.markdown('---')
+
     st.write('Hi, I am MorganAI. I am here to help you with your legal needs.')
     chat_palceholder = st.container()
     prompt_placeholder = st.form("Chat-form")
@@ -131,13 +161,6 @@ def main():
         cols[0].text_input("Chat", value="Hello", key='human_prompt')
         cols[1].form_submit_button("Send", type="primary", on_click=on_click_callback)
 
-    url = st.text_input('Enter form url', key='form_url')
-    if url:
-        text = doc_intel.read_doc_from_url(url).content
-        st.write(f'Type of Document: {get_type_of_document(text)}')
-        st.write(text)
-    
-
 def get_vectorstore(source_doc):
     # Save uploaded file temporarily to disk, load and split the file into pages, delete temp file
     with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
@@ -154,14 +177,9 @@ def get_vectorstore(source_doc):
     return vectordb
 
 def get_type_of_document(document_text: str) -> str:
-    template = """You are an AI legal agent that is working at an injury law firm to classify certain documents. You are given a document and you need to classify it into one of the following categories:
+    template = """You are an AI legal agent that is working at an injury law firm to classify certain documents. You are given a document and you need to classify it into one of the following categories:\n
 
-    1. Court Order
-    2. Letter
-    3. Medical Bill
-    4. Other Bill
-
-    The document you are given (by the user) has been put through an OCR system to convert it from an image to text. The OCR system is not perfect and there may be some errors in the text. Only use the information from the document, and limit your answer to either the numbers "1", "2", or "3" (without the quotes). The user will provide all information from the document between triple backticks in their prompt."""
+    """ + "".join([f"{i+1}. {doc_type}\n" for i, doc_type in enumerate(DOCUMENT_TYPES)]) + """\nThe document you are given (by the user) has been put through an OCR system to convert it from an image to text. The OCR system is not perfect and there may be some errors in the text. Only use the information from the document, and limit your answer to only a single number (e.g. "1"..."7" without the quotes). The user will provide all information from the document between triple backticks in their prompt."""
 
     prompt = ChatPromptTemplate.from_messages([
         SystemMessagePromptTemplate.from_template(template),
