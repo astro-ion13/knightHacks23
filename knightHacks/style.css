@@ -10,7 +10,7 @@ body {
 }
 
 .header {
-  border-bottom: 10px solid #132a4e;
+  border-bottom: 1px solid #132a4e;
   padding-top: 5px;
   padding-bottom: 1px;
   background-color: #132a4e;
@@ -60,12 +60,42 @@ body {
   color: #ffc107;
   font-weight: 600;
 }
+@keyframes fadeIn {
+  from {
+      opacity: 0;
+  }
+  to {
+      opacity: 1;
+  }
+}
+#entertext {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+
+#entertext:after {
+  content: "";
+  display: block;
+  margin: 0 auto;
+  height: 3px;
+  width: 50%;
+  background: #ffc107;
+  transition: width .2s;
+}
+
+#entertext:hover:after {
+  width: 100%;
+}
+
+#enter-text {
+  animation: fadeIn 2s ease-in-out;
+}
 
 /*Section-White*/
 .section-white {
   background-color: white;
   width: 100%;
-  height: 600px;
+  height: 400px;
   color: #132a4e;
   display: flex;
   flex-direction: column;
@@ -77,22 +107,23 @@ body {
 #first-text-box {
   font-size: 35px;
   color: #132a4e;
-  padding: 0.1rem 0.1rem 0.1rem 0.1rem;
+  padding: 0.1rem;
 }
 
 #second-text-box {
   font-size: 40px;
-  padding: 0.1rem 0.1em 0.1rem 0.1rem;
+  padding: 0.1rem;
 }
 /*About Us */
 
 .about-us {
   background-color: #343a40;
   width: 100%;
-  min-height: 500px;
+  min-height: 565git remote -vpx;
   color: white;
   display: flex;
   flex-direction: column;
+  align-items: center;
   padding-top: 5px;
 }
 
@@ -100,6 +131,7 @@ body {
   text-align: center;
   color: #ffc107;
   font-size: 40px;
+  text-decoration: underline;
 }
 #about-us-info {
   text-align: left;
@@ -110,3 +142,71 @@ body {
   padding-left: 5rem;
   color: #ffc107;
 }
+
+/* Boxes  */
+
+
+.container {
+  display: flex;  
+  justify-content: center; 
+  gap: 30px;
+}
+
+.box:hover {
+  transform: scale(1.05); 
+  background-color: #1a1a1a; 
+  transition: all 0.3s ease;
+}
+
+.box {
+  width: 300px;
+  height: 200px;
+  margin: 30px;
+  padding: 20px;
+  background-color: black;
+  color: white;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease; 
+}
+
+h1 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color:#ffc107;
+}
+
+p {
+  font-size: 16px;
+}
+#about-us-step{
+  font-size:20px;
+}
+.get-started-btn {
+  display: inline-block;
+  background-color: #ffc107;
+  color: #132a4e;
+  padding: 10px 15px;
+  font-size: 18px;
+  border-radius: 30px;
+  width: fit-content;
+  margin-top: 20px;
+  text-decoration: none;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.get-started-btn:hover {
+  background-color: #e5a900;  /* Slightly darker shade for hover */
+  transform: scale(1.05);
+}
+
+/* User Input */
+.userInput {
+  background-color: white;
+  width: 100%;
+  min-height: 800px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding-top: 5px;
+}
+
