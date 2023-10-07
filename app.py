@@ -24,6 +24,9 @@ How homeless do I look?
 
 '''
 
+import api_key
+import doc_intel
+
 import streamlit as st
 import os, tempfile
 
@@ -56,8 +59,12 @@ from langchain.chains import ConversationChain
 from langchain.chains.conversation.memory import ConversationSummaryMemory
 import streamlit.components.v1 as components
 
-openai_api_key = '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'
+openai_api_key = api_key.OPENAI_API_KEY
 
+def load_css():
+    with open("static/styles.css", "r") as f:
+        css = f"<style>{f.read()}</style>"
+        st.markdown(css, unsafe_allow_html=True)
 
 
 @dataclass
@@ -87,6 +94,7 @@ def on_click_callback():
 
 def main():
     initialize_session_state()
+    load_css()
     
     # Begin the Streamlit App Here
     st.title('MorganAI')
@@ -103,8 +111,8 @@ def main():
             vectordb = get_vectorstore(source_doc)
             llm = OpenAI(temperature=0, openai_api_key=openai_api_key)
 
-            summary = get_summary(vectordb, llm)
-            st.success(summary)
+            #summary = get_summary(vectordb, llm)
+            #st.success(summary)
               
     st.write('Hi, I am MorganAI. I am here to help you with your legal needs.')
     chat_palceholder = st.container()
@@ -112,13 +120,22 @@ def main():
 
     with chat_palceholder:
         for chat in st.session_state.history:
-            st.markdown(f"**MorganAI** - {chat}")
+            div = f"""
+                <div class="chat-row {'' if chat.origin == 'llm' else 'row-reverse human-bubble'}">{chat.message}</div>
+            """
+            st.markdown(div, unsafe_allow_html=True)
 
     with prompt_placeholder:
         st.markdown("**Chat** - _Press Enter to submit_")
         cols = st.columns((6, 1))
         cols[0].text_input("Chat", value="Hello", key='human_prompt')
         cols[1].form_submit_button("Send", type="primary", on_click=on_click_callback)
+
+    url = st.text_input('Enter form url', key='form_url')
+    if url:
+        text = doc_intel.read_doc_from_url(url).content
+        st.write(f'Type of Document: {get_type_of_document(text)}')
+        st.write(text)
     
 
 def get_vectorstore(source_doc):
@@ -136,17 +153,28 @@ def get_vectorstore(source_doc):
 
     return vectordb
 
+def get_type_of_document(document_text: str) -> str:
+    template = """You are an AI legal agent that is working at an injury law firm to classify certain documents. You are given a document and you need to classify it into one of the following categories:
 
+    1. Court Order
+    2. Letter
+    3. Medical Bill
+    4. Other Bill
 
-def get_summary(vectordb: Chroma, llm) -> str:
-    '''
-    Gets a summary from the vectordb with the current llm
-    '''     
-    chain = load_summarize_chain(llm, chain_type="stuff")
-    search = vectordb.similarity_search(" ")
-    summary = chain.run(input_documents=search, question="Write a summary within 200 words.")
+    The document you are given (by the user) has been put through an OCR system to convert it from an image to text. The OCR system is not perfect and there may be some errors in the text. Only use the information from the document, and limit your answer to either the numbers "1", "2", or "3" (without the quotes). The user will provide all information from the document between triple backticks in their prompt."""
 
-    return summary
+    prompt = ChatPromptTemplate.from_messages([
+        SystemMessagePromptTemplate.from_template(template),
+        HumanMessagePromptTemplate.from_template("Here is the documentation: ```{document_text}```"),
+    ])
+
+    chain = LLMChain(
+        llm=OpenAI(temperature=0, openai_api_key=openai_api_key, model_name='gpt-3.5-turbo'), prompt=prompt
+    )
+
+    response = chain.run(document_text=document_text)
+    return response
+
 
 
 if __name__ == '__main__':
