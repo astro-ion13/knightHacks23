@@ -1,0 +1,112 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #132a4e;
+  color: black;
+  display: flex;
+  flex-direction: column;
+  font-family: "Open Sans", sans-serif;
+}
+
+.header {
+  border-bottom: 10px solid #132a4e;
+  padding-top: 5px;
+  padding-bottom: 1px;
+  background-color: #132a4e;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: 1000%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mm-logo {
+  font-size: 40px;
+  padding: 1.5rem;
+  color: #ffc107;
+  text-align: center;
+}
+.mm-logo-link {
+  text-decoration: none;
+  color: #ffc107;
+}
+
+.mm-logo-link:hover {
+  cursor: pointer;
+}
+
+.header .aboutus:hover {
+  cursor: pointer;
+}
+
+.aboutus {
+  font-size: 40px;
+  padding: 1.5rem;
+  color: #ffc107;
+  text-align: right;
+  text-decoration: none;
+}
+
+#enter-text {
+  min-height: 100vh; /* This ensures the section fills the entire height of the viewport */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 80px;
+  color: #ffc107;
+  font-weight: 600;
+}
+
+/*Section-White*/
+.section-white {
+  background-color: white;
+  width: 100%;
+  height: 600px;
+  color: #132a4e;
+  display: flex;
+  flex-direction: column;
+  min-height: 600px;
+  justify-content: center;
+  align-items: center;
+}
+
+#first-text-box {
+  font-size: 35px;
+  color: #132a4e;
+  padding: 0.1rem 0.1rem 0.1rem 0.1rem;
+}
+
+#second-text-box {
+  font-size: 40px;
+  padding: 0.1rem 0.1em 0.1rem 0.1rem;
+}
+/*About Us */
+
+.about-us {
+  background-color: #343a40;
+  width: 100%;
+  min-height: 500px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding-top: 5px;
+}
+
+#about-us-title {
+  text-align: center;
+  color: #ffc107;
+  font-size: 40px;
+}
+#about-us-info {
+  text-align: left;
+  width: 100%;
+  max-width: 800px;
+  padding-top: -20px;
+  padding-right: 20px;
+  padding-left: 5rem;
+  color: #ffc107;
+}
